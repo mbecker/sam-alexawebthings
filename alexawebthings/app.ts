@@ -44,15 +44,14 @@ import { JWT } from './models/jwt.model';
  */
 export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:AWSLambda.Context):Promise<AWSLambda.APIGatewayProxyResult|AWSLambdaAlexaResult> {
 
-    log("Lamda API Handler", "event", event);
+    log('Lamda API Handler', 'event', event);
 
     let body: AlexaResponseInterface.DirectiveInterface = {};
     try {
         body = await JSON.parse(event.body!);
-        let jwt = await checkJWT(body);;
-        body.jwt = jwt;
+        body.jwt = await checkJWT(body);
     } catch (e) {
-        log("lambdaApiHandler", "error", e);
+        log('lambdaApiHandler', 'error', e);
         return APIGatewayProxyResultError(e);
     }
     
@@ -74,13 +73,12 @@ export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:
 
 export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveInterface, context:AWSLambda.Context):Promise<AWSLambda.APIGatewayProxyResult|AWSLambdaAlexaResult> {
 
-    log("Lamda Alexa Handler", "event", event);
+    log('Lamda Alexa Handler', 'event', event);
 
-    let jwt: JWT.JWTInterface;
     try {
         event.jwt = await checkJWT(event);
     } catch (e) {
-        log(e);
+        log('lambdaAlexaHandler', 'error', e);
         return APIGatewayProxyResultError(e);
     }
 
@@ -117,10 +115,14 @@ export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveI
 
 async function checkJWT(event:AlexaResponseInterface.DirectiveInterface):Promise<JWT.JWTInterface> {
     // Check that token exists (the token is from the user's authorization server and sent by Alexa Smart Home Skill to the Lambda function)
-    if(!_.hasIn(event, 'directive.payload.scope.token')) throw new Error('No event.directive.payload.scope.token exist.');
+    let token: string|undefined = undefined;
+    if(_.hasIn(event, 'directive.payload.scope.token')) token = event.directive!.payload.scope!.token;
+    if(_.hasIn(event, 'directive.endpoint.scope.token')) token = event.directive!.endpoint!.scope.token;
+
+    if(!token) throw new Error('No event.directive.payload.scope.token or event.directive.endpoint.scope.token exist.');
 
     try {
-        const jwt = new JWT.JWT(event.directive!.payload.scope!.token);
+        const jwt = new JWT.JWT(token as string);
         if(!jwt.hasWebthings(JWT.JWTWerbthingsConstants.WebthingsURL)) throw new Error('JWT.webthingsURL does not exist.')
         if(!jwt.hasWebthings(JWT.JWTWerbthingsConstants.WebthingsJWT)) throw new Error('JWT.webthingsJWT does not exist.')
         return jwt;
