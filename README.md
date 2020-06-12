@@ -65,7 +65,7 @@ Okta
 
 - Mozilla Webthings Gateway: [https://iot.mozilla.org/gateway/](https://iot.mozilla.org/gateway/)
 - Alexa Documentation: [https://developer.amazon.com/de-DE/docs/alexa/smarthome/state-reporting-for-a-smart-home-skill.html](https://developer.amazon.com/de-DE/docs/alexa/smarthome/state-reporting-for-a-smart-home-skill.html)
-- AWS Command Line Interface (CLI): [https://aws.amazon.com/cli)[https://aws.amazon.com/cli]](https://aws.amazon.com/cli)[https://aws.amazon.com/cli)
+- AWS Command Line Interface (CLI): [https://aws.amazon.com/cli](https://aws.amazon.com/cli)
 - AWS Serverless Application Model (SAM): [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
 - Okta Authorization Server: [https://www.okta.com/](https://www.okta.com/)
 - Linking Alexa Smart Home Skill with Okta Authorization Server: [https://developer.okta.com/blog/2019/03/20/linking-your-alexa-skils-securely](https://developer.okta.com/blog/2019/03/20/linking-your-alexa-skils-securely)
