@@ -11,9 +11,12 @@
     "@types/lodash": "^4.14.155",
     "axios": "^0.18.0",
     "js-yaml": "^3.14.0",
+    "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15"
   },
-"config" : { "port" : "8080" },
+  "config": {
+    "port": "8080"
+  },
   "scripts": {
     "aws:deletestack": "aws cloudformation delete-stack --stack-name sam-alexawebthings",
     "deploy:sam:only": "node ./bin/samdeployment.js",
