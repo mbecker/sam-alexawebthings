@@ -17,6 +17,7 @@ Globals:
                 ALEXAENDPOINTFRIENDLYNAME: "AlexaWebthing - "
                 ALEXAENDPOINTDESCRIPTION: "AlexaWebthing - "
                 ALEXACAPABILITYINSTANCE: "Webting"
+                OKTATOKEN: "okta_jwt"
 
 
 Resources:

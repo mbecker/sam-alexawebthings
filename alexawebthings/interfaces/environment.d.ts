@@ -7,6 +7,7 @@ declare global {
         ALEXACAPABILITYINSTANCE: string,
         WEBTHINGTOKEN: string,
         WEBTHINGSERVERURL: string,
+        OKTATOKEN: string,
         NODE_ENV: 'development' | 'production',
       }
     }
