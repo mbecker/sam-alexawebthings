@@ -12,6 +12,7 @@ template.*.yaml
 # AWS SAM build files
 alexawebthings/.aws-sam/
 alexawebthings/.aws-sam/*
+.aws-sam/
 
 # Backup files
 *.backup
