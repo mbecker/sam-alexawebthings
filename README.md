@@ -13,10 +13,13 @@ The setup should be developed locally for AWS Lambda. That means the application
 
 ## TODO
 
--[] Update Typescript definiiton for AWS Lambda and Alexa requests/responses
--[] Setup external openID Authorization Server
--[] Store user information like WebthingsURL, WebthingsJWT, etc. in the JWT from the authoriaztion server
--[] Setup Alexa Smart Home Skill in the file template.yaml to automatically link the Lambda function with the Alexa Smart Home skill
+- [ ] Update Typescript definiiton for AWS Lambda and Alexa requests/responses
+
+- [ ] Setup external openID Authorization Server
+
+- [ ] Store user information like WebthingsURL, WebthingsJWT, etc. in the JWT from the authoriaztion server
+
+- [ ] Setup Alexa Smart Home Skill in the file template.yaml to automatically link the Lambda function with the Alexa Smart Home skill
 
 ## Current implementation
 
