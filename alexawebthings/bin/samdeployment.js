@@ -4,8 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const toml = require('toml');
 
-const util = require('util');
-
 // Use the third party module to start the cmd process 'sam'
 const shell = require('shelljs');
 
