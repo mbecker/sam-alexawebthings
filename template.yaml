@@ -13,33 +13,28 @@ Globals:
             Variables:
                 WEBTHINGTOKEN: "webthing_jwt"
                 WEBTHINGSERVERURL: "https://webthingurl.mozilla-iot.org"
-                ALEXAENDPOINTMANUFACTURERNAME: "Webthing"
-                ALEXAENDPOINTFRIENDLYNAME: "Webthing - "
-                ALEXAENDPOINTDESCRIPTION: "Webthing - "
+                ALEXAENDPOINTMANUFACTURERNAME: "AlexaWebthing"
+                ALEXAENDPOINTFRIENDLYNAME: "AlexaWebthing - "
+                ALEXAENDPOINTDESCRIPTION: "AlexaWebthing - "
                 ALEXACAPABILITYINSTANCE: "Webting"
 
 
 Resources:
 
-    AlexaWebthingAPIFunction:
+    AlexaWebthingAPI:
         Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
         Properties:
             CodeUri: dist/
             Handler: app.lambdaApiHandler
             Runtime: nodejs12.x
             Events:
-                HelloWorld:
-                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-                    Properties:
-                        Path: /hello
-                        Method: get
-                AlexaDiscovery:
+                AlexaAPI:
                     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
                     Properties:
                         Path: /alexa
                         Method: post
     
-    Webthing:
+    AlexaWebthingSkill:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: dist/
@@ -59,21 +54,21 @@ Resources:
 
 Outputs:
 
-    HelloWorldApi:
-      Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    AlexaWebthingAPIURL:
+      Description: "API Gateway endpoint URL for Prod stage for Alexa Webthing API"
+      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
 
-    AlexaWebthingAPIFunction:
-      Description: "Hello World Lambda Function ARN"
-      Value: !GetAtt AlexaWebthingAPIFunction.Arn
+    AlexaWebthingAPIArn:
+      Description: "Alexa Webthing API ARN"
+      Value: !GetAtt AlexaWebthingAPI.Arn
 
-    AlexaWebthingAPIFunctionIamRole:
-      Description: "Implicit IAM Role created for Hello World function"
-      Value: !GetAtt AlexaWebthingAPIFunction.Arn
+    AlexaWebthingAPIIamRole:
+      Description: "Implicit IAM Role created for Alexa Webthing API"
+      Value: !GetAtt AlexaWebthingAPI.Arn
     
-    WebthingArn:
-        Value: !GetAtt Webthing.Arn
+    AlexaWebthingSkillArn:
+        Value: !GetAtt AlexaWebthingSkill.Arn
         Description: "Alexa Webthing Lambda function with Alexa Smart Home trigger"
         Export: {
-            Name: !Sub '${AWS::StackName}:Webthing:Arn'
+            Name: !Sub '${AWS::StackName}:AlexaWebthingSkill:Arn'
         }
