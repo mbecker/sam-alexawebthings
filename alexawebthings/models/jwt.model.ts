@@ -42,7 +42,6 @@ export module JWT {
 
         constructor(tokenstring: string) {
             const token = jsonwebtoken.decode(tokenstring);
-            log("token", token);
             if (token === null) {
                 this.webthingsJWT = undefined;
                 this.webthingsURL = undefined;
