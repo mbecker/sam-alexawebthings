@@ -5,7 +5,7 @@ This is a sample template for sam-app - Below is a brief explanation of what we 
 ```bash
 .
 ├── README.md                   <-- This instructions file
-├── hello-world                 <-- Source code for a lambda function
+├── alexawebthings                 <-- Source code for a lambda function
 │   ├── app.js                  <-- Lambda function code
 │   ├── package.json            <-- NodeJS dependencies
 │   └── tests                   <-- Unit tests
@@ -69,7 +69,7 @@ AWS Lambda NodeJS runtime requires a flat folder with all dependencies including
     FirstFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: hello-world/
+            CodeUri: alexawebthings/
             ...
 ```
 
@@ -112,7 +112,7 @@ aws cloudformation describe-stacks \
 We use `mocha` for testing our code and it is already added in `package.json` under `scripts`, so that we can simply run the following command to run our tests:
 
 ```bash
-cd hello-world
+cd alexawebthings
 npm install
 npm run test
 ```

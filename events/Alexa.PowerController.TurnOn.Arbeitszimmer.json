@@ -1,0 +1,22 @@
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.PowerController",
+            "name": "TurnOn",
+            "payloadVersion": "3",
+            "messageId": "c207f8ae-3b49-4669-bded-fa10866f2e4f",
+            "correlationToken": "AAAAAAAAAQDUJ9Lb70vu09eyVL/vXQAX/AEAAAAAAAAnF7oGEoe9c6WGQ4Fj59QHYTyIcxUABOsSZIY/HRZ5sES6bKCGlVqESCEjB/KFA+AFcdUrJJAf/IQuXUnGHwUUIMzhtI9QMD3ldogDkYELZ9S6y76zqyp+u2D89lpHbVc1pFo6LQMFIeq7cVGKrM0jRhS7xLmgzw31Kc3N01JDpG4NMqQ679bPP5pwb9TUElI6bZY0zzcPE6yyspn9cg032Y3QuwI5mbO8mL3Jl/likCpw5KPGZ3NJgLjdoIa/3RJiOvaruyty63sBBH2nOFtjsx8i2l/cZfCA2qWd7TLS4ZeMMkE+1MbqTUb+y8EFeJcy5OOCymY9+WlT38tZ0ww1xsbxDzFglpCG/ZklmqOOuLyVsK+6xkOTT97PlvAmMLTkmkHrrJAAZTY6lRDKTAI2zcKMUPeDLmdxqTbIK+MEm/QEPwMgxIT2CSkiehPDgqm+bXynO+Ym7DLKIDIxK6BUkLEY8fF2PyqFIPtLG7tbwA/Dsab82g6VRTNJ0+w9l8+TdOfnOJo/h6pVjMaff/YyWziVmku22VsSzUgX4N3fYyTod05Au7ZbRdxEXC+yM8yZZwiHncAv6hFqOEuaunoHbUfQPr1Lu6YDb45Bnu/xY8Hia463Qhw/UC1JZjEJroXYdThUm3nDgb1PXL3/6mdQRFWPBmWYj3E01axS"
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "zb-7cb03eaa0a087d58",
+            "cookie": {
+                "on": "Alexa.PowerController"
+            }
+        },
+        "payload": {}
+    }
+}

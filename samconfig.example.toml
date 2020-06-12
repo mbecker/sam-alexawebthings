@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "sam-stackname"
+s3_bucket = "aws-sam-s3bucketname"
+s3_prefix = "sam-stacknameprefix"
+region = "eu-west-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"

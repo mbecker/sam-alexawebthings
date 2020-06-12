@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'sam-app
+
+  Sample SAM Template for sam-app
+
+  '
+Globals:
+  Function:
+    Timeout: 30
+    Environment:
+      Variables:
+        WEBTHINGTOKEN: webthing_jwt
+        WEBTHINGSERVERURL: https://webthingurl.mozilla-iot.org
+        ALEXAENDPOINTMANUFACTURERNAME: Webthing
+        ALEXAENDPOINTFRIENDLYNAME: 'Webthing - '
+        ALEXAENDPOINTDESCRIPTION: 'Webthing - '
+        ALEXACAPABILITYINSTANCE: Webting
+Resources:
+  AlexaWebthingAPIFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: AlexaWebthingAPIFunction
+      Handler: app.lambdaApiHandler
+      Runtime: nodejs12.x
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get
+        AlexaDiscovery:
+          Type: Api
+          Properties:
+            Path: /alexa
+            Method: post
+  Webthing:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: Webthing
+      Handler: app.lambdaAlexaHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 30
+      Description: The lambda function for the Alexa Smart Home Skill
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      Events:
+        Alexa:
+          Type: AlexaSkill
+          Properties:
+            SkillId: amzn1.ask.skill.84996ed9-febf-4da3-8fdc-124f3932ec1c
+Outputs:
+  HelloWorldApi:
+    Description: API Gateway endpoint URL for Prod stage for Hello World function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
+  AlexaWebthingAPIFunction:
+    Description: Hello World Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - AlexaWebthingAPIFunction
+      - Arn
+  AlexaWebthingAPIFunctionIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value:
+      Fn::GetAtt:
+      - AlexaWebthingAPIFunction
+      - Arn
+  WebthingArn:
+    Value:
+      Fn::GetAtt:
+      - Webthing
+      - Arn
+    Description: Alexa Webthing Lambda function with Alexa Smart Home trigger
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}:Webthing:Arn

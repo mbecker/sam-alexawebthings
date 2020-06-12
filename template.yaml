@@ -8,26 +8,54 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
     Function:
-        Timeout: 3
+        Timeout: 30
+        Environment:
+            Variables:
+                WEBTHINGTOKEN: "webthing_jwt"
+                WEBTHINGSERVERURL: "https://webthingurl.mozilla-iot.org"
+                ALEXAENDPOINTMANUFACTURERNAME: "Webthing"
+                ALEXAENDPOINTFRIENDLYNAME: "Webthing - "
+                ALEXAENDPOINTDESCRIPTION: "Webthing - "
+                ALEXACAPABILITYINSTANCE: "Webting"
 
 
 Resources:
 
-    HelloWorldFunction:
+    AlexaWebthingAPIFunction:
         Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
         Properties:
             CodeUri: dist/
-            Handler: app.lambdaHandler
+            Handler: app.lambdaApiHandler
             Runtime: nodejs12.x
-            Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
-                Variables:
-                    PARAM1: VALUE
             Events:
                 HelloWorld:
                     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
                     Properties:
                         Path: /hello
                         Method: get
+                AlexaDiscovery:
+                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+                    Properties:
+                        Path: /alexa
+                        Method: post
+    
+    Webthing:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: dist/
+            Handler: app.lambdaAlexaHandler
+            Runtime: nodejs12.x
+            MemorySize: 128
+            Timeout: 30 # Overide globals
+            Description: The lambda function for the Alexa Smart Home Skill
+            Policies:
+                # Give Lambda basic execution Permission to the helloFromLambda
+                - AWSLambdaBasicExecutionRole
+            Events:
+                Alexa:
+                    Type: AlexaSkill
+                    Properties:
+                        SkillId: amzn1.ask.skill.84996ed9-febf-4da3-8fdc-124f3932ec1c
 
 Outputs:
 
@@ -35,10 +63,17 @@ Outputs:
       Description: "API Gateway endpoint URL for Prod stage for Hello World function"
       Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
 
-    HelloWorldFunction:
+    AlexaWebthingAPIFunction:
       Description: "Hello World Lambda Function ARN"
-      Value: !GetAtt HelloWorldFunction.Arn
+      Value: !GetAtt AlexaWebthingAPIFunction.Arn
 
-    HelloWorldFunctionIamRole:
+    AlexaWebthingAPIFunctionIamRole:
       Description: "Implicit IAM Role created for Hello World function"
-      Value: !GetAtt HelloWorldFunctionRole.Arn
+      Value: !GetAtt AlexaWebthingAPIFunction.Arn
+    
+    WebthingArn:
+        Value: !GetAtt Webthing.Arn
+        Description: "Alexa Webthing Lambda function with Alexa Smart Home trigger"
+        Export: {
+            Name: !Sub '${AWS::StackName}:Webthing:Arn'
+        }
