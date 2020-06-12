@@ -15,6 +15,8 @@ The setup should be developed locally for AWS Lambda. That means the application
 
 - [ ] Update Typescript definiiton for AWS Lambda and Alexa requests/responses
 
+- [ ] Add specific Alexa Events Response errors
+
 - [ ] Setup external openID Authorization Server
 
 - [ ] Store user information like WebthingsURL, WebthingsJWT, etc. in the JWT from the authoriaztion server
