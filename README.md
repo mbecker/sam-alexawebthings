@@ -17,7 +17,9 @@ The setup should be developed locally for AWS Lambda. That means the application
 
 - [ ] Add specific Alexa Events Response errors
 
-- [ ] Setup external openID Authorization Server
+- [x] Setup external openID Authorization Server
+
+- [ ] Describe how to setup external Authorization provider
 
 - [ ] Store user information like WebthingsURL, WebthingsJWT, etc. in the JWT from the authoriaztion server
 
@@ -26,6 +28,12 @@ The setup should be developed locally for AWS Lambda. That means the application
 ## Current implementation
 
 The following section documents the current setup of the architecture, the status of the implementation and the working Iot Devices
+
+## Branches
+
+### authjwt
+
+Includes the external authorization server with the jwt and the claims webthingsURL and webthingsJWt to query the remote Moziall Webthings Gateway.
 
 ### IoT Devices
 
@@ -37,10 +45,34 @@ An IoT device is connected to the Mozilla IoT Gateway (with a protocoll like Zig
 - Zigbee power plugs (Osram)
 
 
-
 ### Authorization Server
 
-Okta
+The current external authorization server for openid is Okta. At Okta I created an application. The authorizaion jwt includes the following jwt claims:
+
+```json
+{
+  "ver": 1,
+  "jti": "AT.fxahfNDGPtB7N0oNThoPyyGUyeIkLI8TTXoRhITxu-Y",
+  "iss": "https://dev-xxx.okta.com/oauth2/xxxx",
+  "aud": "http://alexawebthings.com",
+  "iat": 1591986785,
+  "exp": 1592073185,
+  "cid": "xxx",
+  "uid": "xx",
+  "scp": [
+    "profile",
+    "webthings",
+    "openid"
+  ],
+  "sub": "x",
+  "webthingsJWT": "xxxx.eyJyb2xlIjoidXNlcl90b2tlbiIsImlhdCI6MTU5MTEwOTQ0MywiaXNzIjoiaHR0cHM6Ly9naW5zaGVpbS5tb3ppbGxhLWlvdC5vcmcifQ.Ghnj-bx7QOPB3qZnm5_yi8JYkTvIScTFP69FJiQVs8mvEQpYXhUfg99MPq0d2TnypKza_-jwh9i-59RoV80FNg",
+  "webthingsURL": "https://xxx.mozilla-iot.org",
+  "email": "xxx"
+}
+```
+
+The claims webthingsJWT and webthingsURL are use to query the Mozilla Webthings Gateway at its remote URL.
+(See branch 'authjwt')
 
 ## Prerequisites
 
