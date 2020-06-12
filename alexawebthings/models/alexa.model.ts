@@ -559,15 +559,11 @@ export namespace AlexaResponseInterface {
      * event.endpoint
      */
     export interface EndpointInterface {
-        scope: ScopeInterface;
+        scope: TokenInterface;
         endpointId: string;
         cookie?: AlexaGlobal.Cookie;
     }
 
-    export interface ScopeInterface {
-        type: string;
-        token: string;
-    }
 
     /*
      * directive.payload
@@ -575,10 +571,20 @@ export namespace AlexaResponseInterface {
      */
     export interface PayloadInterface {
         endpoints?: AlexaDiscoveryInterface.AlexaEndpointObject[]
-        scope?: {
-            type: string;
-            token: string;
-        }
+        scope?: TokenInterface
+    }
+
+    /**
+     * The Alexa Directive payload or endpoint token
+     * directive.payload.scope
+     * directive.endpoint.scope
+     *
+     * @export
+     * @interface Token
+     */
+    export interface TokenInterface {
+        type: string;
+        token: string;
     }
 
 
