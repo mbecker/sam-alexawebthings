@@ -9,7 +9,7 @@ const shell = require('shelljs');
 
 // Define constants
 const templateFile = path.resolve(__dirname, '..', '..', 'template.yaml');
-const templateBuildFile = path.resolve(__dirname, '..', '..', 'template.depoyment.yaml');
+const templateDeploymentFile = path.resolve(__dirname, '..', '..', 'template.deployment.yaml');
 const envParameterFile = path.resolve(__dirname, '..', '..', 'env.json');
 const samConfigFile = path.resolve(__dirname, '..', '..', 'samconfig.toml');
 
@@ -30,8 +30,8 @@ async function createDeploymentTemplate() {
         data = data.replace(re, replaceValue);
     }
 
-    // Save the replces data:string as a new file 'template.depoyment.yaml'
-    fs.writeFileSync(templateBuildFile, data, 'utf8');
+    // Save the replces data:string as a new file 'template.deployment.yaml'
+    fs.writeFileSync(templateDeploymentFile, data, 'utf8');
 } catch (err) {
     console.error(err);
 }
@@ -70,7 +70,7 @@ async function samDeployment() {
     
     // Not needed because we creating a new/updated template file --parameter-overrides '${params}'
     // BUG: The flag --parameter-overried doesnt add the env parameters from the file env.json. The default values in the original template.yaml are used (that's why we are creating a new file)
-    const deploymentStatement = `sam deploy ${samDeployOptions} --template ../template.depoyment.yaml --no-confirm-changeset`;
+    const deploymentStatement = `sam deploy ${samDeployOptions} --template ../${templateDeploymentFile} --no-confirm-changeset`;
 
     console.log("--- START SAM:DEPLOYMENT SCRIPT ---");
     console.log(deploymentStatement);
