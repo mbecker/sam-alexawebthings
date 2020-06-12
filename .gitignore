@@ -1,9 +1,11 @@
-
 # The dist folder which includes the built app/scripts (referenced in the file template.yaml)
 dist/
 
 # Environment parameters / variables (used for local testing and creating the file template.deployment.yaml for sam deployment process)
 env.json
+
+# Debug files (includes jwt from Mozilla Gateway)
+events/*.debug.json
 
 # AWS SAM configuration/deployment file
 samconfig.toml
