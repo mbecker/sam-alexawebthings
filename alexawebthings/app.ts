@@ -6,6 +6,7 @@ import {AWSLambdaAlexaResult} from './interfaces/aws.interfaces';
 import { log } from './utils/log.utils';
 import { AlexaGlobal, AlexaResponseInterface } from './models/alexa.model';
 import { handleThingsRequest, handleThingPropertyRequest, handleThingPropertyPut} from './services/webthings.service';
+import { JWT } from './models/jwt.model';
 
 /**
  *
@@ -47,10 +48,14 @@ export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:
 
     let body: AlexaResponseInterface.DirectiveInterface = {};
     try {
-        body = JSON.parse(event.body!);
+        body = await JSON.parse(event.body!);
+        let jwt = await checkJWT(body);;
+        body.jwt = jwt;
     } catch (e) {
-        log(e);
+        log("lambdaApiHandler", "error", e);
+        return APIGatewayProxyResultError(e);
     }
+    
     if (_.hasIn(body, 'directive.header.namespace') && _.hasIn(body, 'directive.header.name')) {
         if (body.directive!.header.namespace === 'Alexa.Discovery' && body.directive!.header.name === 'Discover') {
             return AlexaDiscoverDirective(body, context);
@@ -70,6 +75,15 @@ export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:
 export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveInterface, context:AWSLambda.Context):Promise<AWSLambda.APIGatewayProxyResult|AWSLambdaAlexaResult> {
 
     log("Lamda Alexa Handler", "event", event);
+
+    let jwt: JWT.JWTInterface;
+    try {
+        event.jwt = await checkJWT(event);
+    } catch (e) {
+        log(e);
+        return APIGatewayProxyResultError(e);
+    }
+
 
     if (_.hasIn(event, 'directive.header.namespace') && _.hasIn(event, 'directive.header.name')) {
         
@@ -101,10 +115,27 @@ export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveI
 
 };
 
+async function checkJWT(event:AlexaResponseInterface.DirectiveInterface):Promise<JWT.JWTInterface> {
+    // Check that token exists (the token is from the user's authorization server and sent by Alexa Smart Home Skill to the Lambda function)
+    if(!_.hasIn(event, 'directive.payload.scope.token')) throw new Error('No event.directive.payload.scope.token exist.');
+
+    try {
+        const jwt = new JWT.JWT(event.directive!.payload.scope!.token);
+        if(!jwt.hasWebthings(JWT.JWTWerbthingsConstants.WebthingsURL)) throw new Error('JWT.webthingsURL does not exist.')
+        if(!jwt.hasWebthings(JWT.JWTWerbthingsConstants.WebthingsJWT)) throw new Error('JWT.webthingsJWT does not exist.')
+        return jwt;
+    } catch (err) {
+        log('checkJWT', 'error', err);
+        throw err;
+    }
+}
+
+
+
 
 async function AlexaDiscoverDirective(event:AlexaResponseInterface.DirectiveInterface, context:AWSLambda.Context, alexaResponse:boolean = false):Promise<AWSLambda.APIGatewayProxyResult|AWSLambdaAlexaResult> {
 
-    return handleThingsRequest()
+    return handleThingsRequest(event.jwt!)
         .then(webthings => {
             const alexaResult = new AlexaResponseInterface.EventResponseInterface(event);
             alexaResult.addEventPayloadEventsEndpoint(webthings.alexaEndpoints);
@@ -126,7 +157,7 @@ async function AlexaReportStateDirective(event:AlexaResponseInterface.DirectiveI
 
     const webthingEndpointID = event.directive!.endpoint!.endpointId;
     const cookie = event.directive!.endpoint!.cookie as AlexaGlobal.Cookie;
-    return handleThingPropertyRequest(webthingEndpointID)
+    return handleThingPropertyRequest(event.jwt!, webthingEndpointID)
         .then(properties => {
 
             const alexaResult = new AlexaResponseInterface.EventResponseInterface(event);
@@ -162,7 +193,7 @@ async function AlexaPowerControllerDirective(event:AlexaResponseInterface.Direct
         if(alexaInterface !== AlexaGlobal.Interfaces.ALEXA_POWER_CONTROLLER) continue;
         // TODO: The propertyValue must be identifed by the AlexaGlobal.Interface to be more generic
         const propertyValue: any = AlexaGlobal.InterfaceValue(AlexaGlobal.Interfaces.ALEXA_POWER_CONTROLLER, event.directive!.header.name);
-        return handleThingPropertyPut(event.directive!.endpoint!.endpointId, alexaInstance, propertyValue)
+        return handleThingPropertyPut(event.jwt!, event.directive!.endpoint!.endpointId, alexaInstance, propertyValue)
                 .then(properties => {
                     const alexaResult = new AlexaResponseInterface.EventResponseInterface(event);
                     
@@ -191,10 +222,10 @@ async function APIGatewayProxyResultDefault():Promise<AWSLambda.APIGatewayProxyR
     return response;
 }
 
-async function APIGatewayProxyResultError(message: string):Promise<AWSLambda.APIGatewayProxyResult> {
+async function APIGatewayProxyResultError(message: Error|string):Promise<AWSLambda.APIGatewayProxyResult> {
     const response:AWSLambda.APIGatewayProxyResult = {
         'statusCode': 200,
-        'body': JSON.stringify({error: message})
+        'body': JSON.stringify({error: (message instanceof Error) ? message.message : message})
     }
     return response;
 }

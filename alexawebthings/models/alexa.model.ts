@@ -1,5 +1,6 @@
 import * as _ from "lodash";
 import { Webthing } from "./webthing.model";
+import { JWT } from "./jwt.model";
 
 export namespace AlexaGlobal {
 
@@ -574,6 +575,10 @@ export namespace AlexaResponseInterface {
      */
     export interface PayloadInterface {
         endpoints?: AlexaDiscoveryInterface.AlexaEndpointObject[]
+        scope?: {
+            type: string;
+            token: string;
+        }
     }
 
 
@@ -601,6 +606,7 @@ export namespace AlexaResponseInterface {
      */
     export interface DirectiveInterface {
         directive?: DirectiveEventInterface;
+        jwt?: JWT.JWTInterface
     }
 
     /*

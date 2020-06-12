@@ -3,15 +3,16 @@ import * as _ from "lodash";
 
 import { Webthing } from '../models/webthing.model';
 import { AlexaDiscoveryInterface } from '../models/alexa.model'
+import { JWT } from '../models/jwt.model';
 
-export async function handleThingsRequest(): Promise<AlexaDiscoveryInterface.AlexaThings> {
+export async function handleThingsRequest(jwt: JWT.JWTInterface): Promise<AlexaDiscoveryInterface.AlexaThings> {
 
     const options = {
         method: 'get',
-        url: `${process.env.WEBTHINGSERVERURL}/things`,
+        url: `${jwt.webthingsURL}/things`,
         headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${process.env.WEBTHINGTOKEN}`
+            'Authorization': `Bearer ${jwt.webthingsJWT}`
         }
     };
 
@@ -26,13 +27,13 @@ export async function handleThingsRequest(): Promise<AlexaDiscoveryInterface.Ale
 
 }
 
-export async function handleThingPropertyRequest(endpointID: string): Promise<Webthing.PropertyResponse> {
+export async function handleThingPropertyRequest(jwt: JWT.JWTInterface, endpointID: string): Promise<Webthing.PropertyResponse> {
     const options = {
         method: 'get',
-        url: `${process.env.WEBTHINGSERVERURL}/things/${endpointID}/properties`,
+        url: `${jwt.webthingsURL}/things/${endpointID}/properties`,
         headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${process.env.WEBTHINGTOKEN}`
+            'Authorization': `Bearer ${jwt.webthingsJWT}`
         }
     };
 
@@ -60,15 +61,15 @@ export async function handleThingPropertyRequest(endpointID: string): Promise<We
 
 }
 
-export async function handleThingPropertyPut(endpointID: string, propertyKey: string, propertyValue: any): Promise<Webthing.PropertyResponse> {
+export async function handleThingPropertyPut(jwt: JWT.JWTInterface, endpointID: string, propertyKey: string, propertyValue: any): Promise<Webthing.PropertyResponse> {
 
     const options = {
         method: 'put',
-        url: `${process.env.WEBTHINGSERVERURL}/things/${endpointID}/properties/${propertyKey}`,
+        url: `${jwt.webthingsURL}/things/${endpointID}/properties/${propertyKey}`,
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.WEBTHINGTOKEN}`
+            'Authorization': `Bearer ${jwt.webthingsJWT}`
         },
         data: JSON.stringify({ [propertyKey]: propertyValue })
     };
