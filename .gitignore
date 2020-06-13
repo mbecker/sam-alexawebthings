@@ -7,6 +7,7 @@ env.json
 
 # Debug files (includes jwt from Mozilla Gateway)
 events/*.debug.json
+*.debug.*
 
 # AWS SAM configuration/deployment file
 samconfig.toml
