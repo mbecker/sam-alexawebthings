@@ -12,6 +12,7 @@ events/*.debug.json
 # AWS SAM configuration/deployment file
 samconfig.toml
 template.*.yaml
+*.deployment.*
 
 # AWS SAM build files
 alexawebthings/.aws-sam/
