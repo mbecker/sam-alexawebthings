@@ -3,16 +3,16 @@ import * as _ from "lodash";
 
 import { Webthing } from '../models/webthing.model';
 import { AlexaDiscoveryInterface } from '../models/alexa.model'
-import { JWT } from '../models/jwt.model';
+import { User } from '../models/user.model';
 
-export async function handleThingsRequest(jwt: JWT.JWTInterface): Promise<AlexaDiscoveryInterface.AlexaThings> {
+export async function handleThingsRequest(user: User.IUser): Promise<AlexaDiscoveryInterface.AlexaThings> {
 
     const options = {
         method: 'get',
-        url: `${jwt.webthingsURL}/things`,
+        url: `${user.webthingsUrl}/things`,
         headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${jwt.webthingsJWT}`
+            'Authorization': `Bearer ${user.webthingsJwt}`
         }
     };
 
@@ -27,13 +27,13 @@ export async function handleThingsRequest(jwt: JWT.JWTInterface): Promise<AlexaD
 
 }
 
-export async function handleThingPropertyRequest(jwt: JWT.JWTInterface, endpointID: string): Promise<Webthing.PropertyResponse> {
+export async function handleThingPropertyRequest(user: User.IUser, endpointID: string): Promise<Webthing.PropertyResponse> {
     const options = {
         method: 'get',
-        url: `${jwt.webthingsURL}/things/${endpointID}/properties`,
+        url: `${user.webthingsUrl}/things/${endpointID}/properties`,
         headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${jwt.webthingsJWT}`
+            'Authorization': `Bearer ${user.webthingsJwt}`
         }
     };
 
@@ -61,15 +61,15 @@ export async function handleThingPropertyRequest(jwt: JWT.JWTInterface, endpoint
 
 }
 
-export async function handleThingPropertyPut(jwt: JWT.JWTInterface, endpointID: string, propertyKey: string, propertyValue: any): Promise<Webthing.PropertyResponse> {
+export async function handleThingPropertyPut(user: User.IUser, endpointID: string, propertyKey: string, propertyValue: any): Promise<Webthing.PropertyResponse> {
 
     const options = {
         method: 'put',
-        url: `${jwt.webthingsURL}/things/${endpointID}/properties/${propertyKey}`,
+        url: `${user.webthingsUrl}/things/${endpointID}/properties/${propertyKey}`,
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt.webthingsJWT}`
+            'Authorization': `Bearer ${user.webthingsJwt}`
         },
         data: JSON.stringify({ [propertyKey]: propertyValue })
     };

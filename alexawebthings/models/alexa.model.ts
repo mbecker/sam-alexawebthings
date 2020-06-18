@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 import { Webthing } from "./webthing.model";
-import { JWT } from "./jwt.model";
+import { User } from "./user.model";
 
 export namespace AlexaGlobal {
 
@@ -612,7 +612,7 @@ export namespace AlexaResponseInterface {
      */
     export interface DirectiveInterface {
         directive?: DirectiveEventInterface;
-        jwt?: JWT.JWTInterface
+        user?: User.IUser;
     }
 
     /*
