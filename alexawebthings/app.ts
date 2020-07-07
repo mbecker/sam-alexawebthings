@@ -50,7 +50,7 @@ export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:
     let body: AlexaResponseInterface.DirectiveInterface = {};
     try {
         body = await JSON.parse(event.body!);
-        body.user = await checkJWT(body);
+        body.user = await getUserFromAlexaPayloadScopeToken(body);
     } catch (e) {
         log('lambdaApiHandler', 'error', e);
         return APIGatewayProxyResultError(e);
@@ -77,7 +77,7 @@ export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveI
     log('Lamda Alexa Handler', 'event', event);
 
     try {
-        event.user = await checkJWT(event);
+        event.user = await getUserFromAlexaPayloadScopeToken(event);
     } catch (e) {
         log('lambdaAlexaHandler', 'error', e);
         return APIGatewayProxyResultError(e);
@@ -113,25 +113,29 @@ export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveI
     return APIGatewayProxyResultDefault();
 
 };
-
-async function checkJWT(event:AlexaResponseInterface.DirectiveInterface):Promise<User.User> {
+/**
+ * Get the user object from the Alexa Request Directive Payload Scope Token
+ * @param  {AlexaResponseInterface.DirectiveInterface} event - The lamda event which is the Alexa Directive
+ * @returns {Promise<User.User>} user - The user object
+ */
+async function getUserFromAlexaPayloadScopeToken(event:AlexaResponseInterface.DirectiveInterface):Promise<User.User> {
     // Check that token exists (the token is from the user's authorization server and sent by Alexa Smart Home Skill to the Lambda function)
+    // Could be either in the payload for 'AlexaDiscovery.Discover' or 'endpoint for directives like 'Alexa.PowerController.TurnOn', 'Alexa.ReportState', etc.
     let token: string|undefined = undefined;
-    if(_.hasIn(event, 'directive.payload.scope.token')) token = event.directive!.payload.scope!.token;
-    if(_.hasIn(event, 'directive.endpoint.scope.token')) token = event.directive!.endpoint!.scope.token;
+    if(_.hasIn(event, 'directive.payload.scope.token')) token = event.directive!.payload.scope!.token; // Directive 'Alexa.Discovery.Discover'
+    if(_.hasIn(event, 'directive.endpoint.scope.token')) token = event.directive!.endpoint!.scope.token; // Directive like 'Alexa.PowerController.TurnOn', 'Alexa.ReportState', etc.
 
     if(!token) throw new Error('No event.directive.payload.scope.token or event.directive.endpoint.scope.token exist.');
 
     try {
         const user = new User.User(token as string);
-        await user.getUserInformation();
-        return user;
+        return user.getUserInformation();;
         // const jwt = new JWT.JWT(token as string);
         // if(!jwt.hasWebthings(JWT.JWTWerbthingsConstants.WebthingsURL)) throw new Error('JWT.webthingsURL does not exist.')
         // if(!jwt.hasWebthings(JWT.JWTWerbthingsConstants.WebthingsJWT)) throw new Error('JWT.webthingsJWT does not exist.')
         // return jwt;
     } catch (err) {
-        log('checkJWT', 'error', err);
+        log('getUserFromAlexaPayloadScopeToken', 'error', err);
         return err;
     }
 }
@@ -248,6 +252,11 @@ async function SendResponse(result: AlexaResponseInterface.ResponseInterface, al
     
     const response:AWSLambda.APIGatewayProxyResult = {
         'statusCode': 200,
+        headers: {
+            "Access-Control-Allow-Headers" : "Content-Type",
+            "Access-Control-Allow-Origin": "https://smartwebthings.com",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+        },
         'body': body
     }
     log('SendResponse', 'apiResponse', response);

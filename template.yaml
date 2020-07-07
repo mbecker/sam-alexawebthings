@@ -28,6 +28,9 @@ Resources:
             CodeUri: dist/
             Handler: app.lambdaApiHandler
             Runtime: nodejs12.x
+            Policies:
+                # Give API Lambda handler basic permission to read from DynamoDB
+                - AmazonDynamoDBReadOnlyAccess
             Events:
                 AlexaAPI:
                     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -47,8 +50,11 @@ Resources:
             Policies:
                 # Give Lambda basic execution Permission to the helloFromLambda
                 - AWSLambdaBasicExecutionRole
+                # Give Alexa Skill Lambda handler basic permission to read from DynamoDB
+                - AmazonDynamoDBReadOnlyAccess
             Events:
                 Alexa:
+                    # TODO: The Event / Trigger Alexa Skill Smart Homde does not yet exists as a programmtic statement
                     Type: AlexaSkill
                     Properties:
                         SkillId: amzn1.ask.skill.84996ed9-febf-4da3-8fdc-124f3932ec1c

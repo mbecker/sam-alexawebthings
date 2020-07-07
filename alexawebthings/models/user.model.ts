@@ -88,7 +88,7 @@ export module User {
             }
         }
 
-        async getUserInformation(): Promise<boolean> {
+        async getUserInformation(): Promise<User> {
 
             try {
                 if (!this.username) throw new Error('No username exists for user.')
@@ -107,7 +107,7 @@ export module User {
                 this.webthingsJwt = item.webthingjwt.S!;
                 if (_.has(item, 'createdAt')) this.createdAt = item.createdAt.S!;
                 if (_.has(item, 'updatedAt')) this.updatedAt = item.updatedAt.S!;
-                return true;
+                return this;
             } catch (err) {
                 return err;
             }

@@ -70,7 +70,7 @@ async function samDeployment() {
     
     // Not needed because we creating a new/updated template file --parameter-overrides '${params}'
     // BUG: The flag --parameter-overried doesnt add the env parameters from the file env.json. The default values in the original template.yaml are used (that's why we are creating a new file)
-    const deploymentStatement = `sam deploy ${samDeployOptions} --template ../${templateDeploymentFile} --no-confirm-changeset`;
+    const deploymentStatement = `sam deploy ${samDeployOptions} --template ${templateDeploymentFile} --no-confirm-changeset`;
 
     console.log("--- START SAM:DEPLOYMENT SCRIPT ---");
     console.log(deploymentStatement);
