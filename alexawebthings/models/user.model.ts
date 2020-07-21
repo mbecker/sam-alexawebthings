@@ -9,6 +9,7 @@ const ddb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
 
 import * as _ from "lodash";
 import { log } from '../utils/log.utils';
+import { CryptoHelper } from './cryptohelper';
 
 const jsonwebtoken = require('jsonwebtoken');
 
@@ -81,24 +82,24 @@ export module User {
         if (!user.username) return log('user.mode', 'addCount', 'error: No this.username exists');
         const dt = new Date();
 
-       var params = {
-            TableName: 'webthingscount-5y5l2zfbizdbfl2i4hpwilrfa4-dev',
-            Key:{
+        var params = {
+            TableName: process.env.DYNAMODBCOUNT,
+            Key: {
                 'uuid': { S: user.username },
-                'countdate': {S: `${dt.getFullYear()}${('0'+(dt.getMonth()+1)).slice(-2)}` }
+                'countdate': { S: `${dt.getFullYear()}${('0' + (dt.getMonth() + 1)).slice(-2)}` }
             },
             // ConditionExpression: `countdate = :dateyearmonth`,
             UpdateExpression: `ADD ${counterType} :val`,
-            ExpressionAttributeValues:{
+            ExpressionAttributeValues: {
                 ':val': { N: '1' },
                 // ':dateyearmonth': {S: `${dt.getFullYear()}${('0'+(dt.getMonth()+1)).slice(-2)}`}  // 202007, 202008, 202011
             },
-            ReturnValues:"UPDATED_NEW"
+            ReturnValues: "UPDATED_NEW"
         };
-        
+
         log("user.model", "Updating counter type: " + counterType, params);
-        
-        ddb.updateItem(params, function(err, data) {
+
+        ddb.updateItem(params, function (err, data) {
             if (err) {
                 log('user.mode', 'addCount', new Error("Unable to update item. Error JSON"), JSON.stringify(err, null, 2));
             } else {
@@ -130,7 +131,7 @@ export module User {
             try {
                 if (!this.username) throw new Error('No username exists for user.')
                 const params = {
-                    TableName: 'Webthing-5y5l2zfbizdbfl2i4hpwilrfa4-dev',
+                    TableName: process.env.DYNAMODBCUSTOMER,
                     Key: {
                         'uuid': { S: this.username }
                     }
@@ -138,10 +139,10 @@ export module User {
                 const data = await ddb.getItem(params).promise();
                 if (!_.has(data, 'Item')) throw new Error('DynamoDB.GetItemOutput.Item does not exist.')
                 const item = data.Item!;
-                if (!_.has(item, 'webthingurl')) throw new Error('DynamoDB.GetItemOutput.Item has no attribute webthingurl.')
-                if (!_.has(item, 'webthingjwt')) throw new Error('DynamoDB.GetItemOutput.Item has no attribute webthingjwt.')
-                this.webthingsUrl = item.webthingurl.S!;
-                this.webthingsJwt = item.webthingjwt.S!;
+                if (!_.has(item, 'url')) throw new Error('DynamoDB.GetItemOutput.Item has no attribute url.')
+                if (!_.has(item, 'token')) throw new Error('DynamoDB.GetItemOutput.Item has no attribute token.')
+                this.webthingsUrl = CryptoHelper.crypto_helper.decrypt(item.url.S!);
+                this.webthingsJwt = CryptoHelper.crypto_helper.decrypt(item.token.S!);
                 if (_.has(item, 'createdAt')) this.createdAt = item.createdAt.S!;
                 if (_.has(item, 'updatedAt')) this.updatedAt = item.updatedAt.S!;
                 return this;
