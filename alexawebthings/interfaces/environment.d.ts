@@ -9,6 +9,9 @@ declare global {
         WEBTHINGSERVERURL: string,
         OKTATOKEN: string,
         NODE_ENV: 'development' | 'production',
+        ENCRYPTIONKEY: string,
+        DYNAMODBCUSTOMER: string,
+        DYNAMODBCOUNT: string,
       }
     }
   }

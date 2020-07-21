@@ -1,81 +1,89 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
-    sam-app
+  sam-app
 
-    Sample SAM Template for sam-app
-    
+  Sample SAM Template for sam-app
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
-    Function:
-        Timeout: 30
-        Environment:
-            Variables:
-                WEBTHINGTOKEN: "webthing_jwt"
-                WEBTHINGSERVERURL: "https://webthingurl.mozilla-iot.org"
-                ALEXAENDPOINTMANUFACTURERNAME: "AlexaWebthing"
-                ALEXAENDPOINTFRIENDLYNAME: "AlexaWebthing - "
-                ALEXAENDPOINTDESCRIPTION: "AlexaWebthing - "
-                ALEXACAPABILITYINSTANCE: "Webting"
-                OKTATOKEN: "okta_jwt"
-
+  Api:
+    Cors:
+      AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'"
+      AllowOrigin: "'*'"
+    Auth:
+      AddDefaultAuthorizerToCorsPreflight: False
+  Function:
+    Timeout: 30
+    Environment:
+      Variables:
+        WEBTHINGTOKEN: "webthing_jwt"
+        WEBTHINGSERVERURL: "https://webthingurl.mozilla-iot.org"
+        ALEXAENDPOINTMANUFACTURERNAME: "AlexaWebthing"
+        ALEXAENDPOINTFRIENDLYNAME: "AlexaWebthing - "
+        ALEXAENDPOINTDESCRIPTION: "AlexaWebthing - "
+        ALEXACAPABILITYINSTANCE: "Webting"
+        OKTATOKEN: "okta_jwt"
+        ENCRYPTIONKEY": "ENCRYPTIONKEY"
+        DYNAMODBCUSTOMER: "Customer-01234567890-dev"
+        DYNAMODBCOUNT: "webthingscount-01234567890-dev"
 
 Resources:
+  AlexaWebthingAPI:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: dist/
+      Handler: app.lambdaApiHandler
+      Runtime: nodejs12.x
+      Policies:
+        # Give API Lambda handler basic permission to read from DynamoDB
+        - AmazonDynamoDBReadOnlyAccess
+      Events:
+        AlexaAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /alexa
+            Method: post
 
-    AlexaWebthingAPI:
-        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-        Properties:
-            CodeUri: dist/
-            Handler: app.lambdaApiHandler
-            Runtime: nodejs12.x
-            Policies:
-                # Give API Lambda handler basic permission to read from DynamoDB
-                - AmazonDynamoDBReadOnlyAccess
-            Events:
-                AlexaAPI:
-                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-                    Properties:
-                        Path: /alexa
-                        Method: post
-    
-    AlexaWebthingSkill:
-        Type: AWS::Serverless::Function
-        Properties:
-            CodeUri: dist/
-            Handler: app.lambdaAlexaHandler
-            Runtime: nodejs12.x
-            MemorySize: 128
-            Timeout: 30 # Overide globals
-            Description: The lambda function for the Alexa Smart Home Skill
-            Policies:
-                # Give Lambda basic execution Permission to the helloFromLambda
-                - AWSLambdaBasicExecutionRole
-                # Give Alexa Skill Lambda handler basic permission to read from DynamoDB
-                - AmazonDynamoDBReadOnlyAccess
-            Events:
-                Alexa:
-                    # TODO: The Event / Trigger Alexa Skill Smart Homde does not yet exists as a programmtic statement
-                    Type: AlexaSkill
-                    Properties:
-                        SkillId: amzn1.ask.skill.84996ed9-febf-4da3-8fdc-124f3932ec1c
+  AlexaWebthingSkill:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: app.lambdaAlexaHandler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 30 # Overide globals
+      Description: The lambda function for the Alexa Smart Home Skill
+      Policies:
+        # Give Lambda basic execution Permission to the helloFromLambda
+        - AWSLambdaBasicExecutionRole
+        # Give Alexa Skill Lambda handler basic permission to read from DynamoDB
+        - AmazonDynamoDBFullAccess
+      Events:
+        Alexa:
+          # TODO: The Event / Trigger Alexa Skill Smart Homde does not yet exists as a programmtic statement
+          Type: AlexaSkill
+          Properties:
+            SkillId: amzn1.ask.skill.84996ed9-febf-4da3-8fdc-124f3932ec1c
 
 Outputs:
+  AlexaWebthingAPIURL:
+    Description: "API Gateway endpoint URL for Prod stage for Alexa Webthing API"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Export: { Name: !Sub "${AWS::StackName}:AlexaWebthingAPIURL:Arn" }
 
-    AlexaWebthingAPIURL:
-      Description: "API Gateway endpoint URL for Prod stage for Alexa Webthing API"
-      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  AlexaWebthingAPIArn:
+    Description: "Alexa Webthing API ARN"
+    Value: !GetAtt AlexaWebthingAPI.Arn
+    Export: { Name: !Sub "${AWS::StackName}:AlexaWebthingAPIArn:Arn" }
 
-    AlexaWebthingAPIArn:
-      Description: "Alexa Webthing API ARN"
-      Value: !GetAtt AlexaWebthingAPI.Arn
+  AlexaWebthingAPIIamRole:
+    Description: "Implicit IAM Role created for Alexa Webthing API"
+    Value: !GetAtt AlexaWebthingAPI.Arn
+    Export: { Name: !Sub "${AWS::StackName}:AlexaWebthingAPIIamRole:Arn" }
 
-    AlexaWebthingAPIIamRole:
-      Description: "Implicit IAM Role created for Alexa Webthing API"
-      Value: !GetAtt AlexaWebthingAPI.Arn
-    
-    AlexaWebthingSkillArn:
-        Value: !GetAtt AlexaWebthingSkill.Arn
-        Description: "Alexa Webthing Lambda function with Alexa Smart Home trigger"
-        Export: {
-            Name: !Sub '${AWS::StackName}:AlexaWebthingSkill:Arn'
-        }
+  AlexaWebthingSkillArn:
+    Value: !GetAtt AlexaWebthingSkill.Arn
+    Description: "Alexa Webthing Lambda function with Alexa Smart Home trigger"
+    Export: { Name: !Sub "${AWS::StackName}:AlexaWebthingSkill:Arn" }
