@@ -47,6 +47,23 @@ export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:
 
     log('Lamda API Handler', 'event', event);
 
+    if(event.httpMethod === 'OPTIONS') {
+        log('HTTP Method OPTIONS')
+        const response:AWSLambda.APIGatewayProxyResult = {
+            'statusCode': 200,
+            headers: {
+                "Access-Control-Allow-Credentials" : true, // Required for cookies, authorization headers with HTTPS 
+                "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+                "X-Requested-With": "*"
+            },
+            'body': 'Hello World'
+        }
+        log('SendResponse', 'apiResponse', response);
+        return response;
+    }
+
     let body: AlexaResponseInterface.DirectiveInterface = {};
     try {
         body = await JSON.parse(event.body!);
@@ -87,9 +104,11 @@ export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveI
     if (_.hasIn(event, 'directive.header.namespace') && _.hasIn(event, 'directive.header.name')) {
         
         log(event.directive!.header.namespace, event.directive!.header.name);
-        
-        if (event.directive!.header.namespace === AlexaGlobal.Interfaces.ALEXA_DISCOVERY && event.directive!.header.name === AlexaGlobal.DirectiveHeaderNames.DISCOVER) {
-            
+
+        if (event.directive!.header.namespace === AlexaGlobal.Interfaces.ALEXA_DISCOVERY && event.directive!.header.name === AlexaGlobal.DirectiveHeaderNames.DISCOVER) { 
+            // Add count
+            User.addCount(event.user!, User.IFAlexaCounter.Discovery);
+            // Return          
             return AlexaDiscoverDirective(event, context, true);
         }
         
@@ -98,6 +117,9 @@ export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveI
          * (Example: https://developer.amazon.com/de-DE/docs/alexa/device-apis/alexa-powercontroller.html#state-report)
          */
         if (event.directive!.header.namespace === AlexaGlobal.Interfaces.ALEXA && event.directive!.header.name === AlexaGlobal.DirectiveHeaderNames.REPORTSTATE) {
+            // Add count
+            User.addCount(event.user!, User.IFAlexaCounter.ReportState);
+            // Return
             return AlexaReportStateDirective(event, context, true);
         }
 
@@ -106,6 +128,9 @@ export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveI
          */
          
         if (event.directive!.header.namespace === AlexaGlobal.Interfaces.ALEXA_POWER_CONTROLLER) {
+            // Add count
+            User.addCount(event.user!, User.IFAlexaCounter.PowerController);
+            // Return
             return AlexaPowerControllerDirective(event, context, true);
         }
     }
@@ -253,9 +278,11 @@ async function SendResponse(result: AlexaResponseInterface.ResponseInterface, al
     const response:AWSLambda.APIGatewayProxyResult = {
         'statusCode': 200,
         headers: {
-            "Access-Control-Allow-Headers" : "Content-Type",
-            "Access-Control-Allow-Origin": "https://smartwebthings.com",
-            "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+            "Access-Control-Allow-Credentials" : true, // Required for cookies, authorization headers with HTTPS 
+            "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+            "X-Requested-With": "*"
         },
         'body': body
     }

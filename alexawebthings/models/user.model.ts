@@ -8,6 +8,7 @@ import AWS from 'aws-sdk';
 const ddb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
 
 import * as _ from "lodash";
+import { log } from '../utils/log.utils';
 
 const jsonwebtoken = require('jsonwebtoken');
 
@@ -70,6 +71,42 @@ export module User {
         username: string;
     }
 
+    export enum IFAlexaCounter {
+        Discovery = 'discovery',
+        ReportState = 'reportstate',
+        PowerController = 'powercontroller',
+    }
+
+    export function addCount(user: IUser, counterType: IFAlexaCounter) {
+        if (!user.username) return log('user.mode', 'addCount', 'error: No this.username exists');
+        const dt = new Date();
+
+       var params = {
+            TableName: 'webthingscount-5y5l2zfbizdbfl2i4hpwilrfa4-dev',
+            Key:{
+                'uuid': { S: user.username },
+                'countdate': {S: `${dt.getFullYear()}${('0'+(dt.getMonth()+1)).slice(-2)}` }
+            },
+            // ConditionExpression: `countdate = :dateyearmonth`,
+            UpdateExpression: `ADD ${counterType} :val`,
+            ExpressionAttributeValues:{
+                ':val': { N: '1' },
+                // ':dateyearmonth': {S: `${dt.getFullYear()}${('0'+(dt.getMonth()+1)).slice(-2)}`}  // 202007, 202008, 202011
+            },
+            ReturnValues:"UPDATED_NEW"
+        };
+        
+        log("user.model", "Updating counter type: " + counterType, params);
+        
+        ddb.updateItem(params, function(err, data) {
+            if (err) {
+                log('user.mode', 'addCount', new Error("Unable to update item. Error JSON"), JSON.stringify(err, null, 2));
+            } else {
+                log('user.mode', 'addCount', "UpdateItem succeeded:", JSON.stringify(data, null, 2));
+            }
+        });
+    }
+
     export class User implements IUser {
         username: string | undefined;
         webthingsUrl?: string | undefined;
@@ -114,5 +151,6 @@ export module User {
 
 
         }
+
     }
 }
