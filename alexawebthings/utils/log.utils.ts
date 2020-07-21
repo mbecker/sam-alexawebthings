@@ -1,7 +1,3 @@
-export function consoleLogSomething() {
-    console.log('Why hello there!');
-}
-
 /**
  * @param  {any[]} ...messages The messages to log
  * @return {void} console.log(msg)
