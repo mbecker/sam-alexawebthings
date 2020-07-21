@@ -89,9 +89,15 @@ export module User {
                 'countdate': { S: `${dt.getFullYear()}${('0' + (dt.getMonth() + 1)).slice(-2)}` }
             },
             // ConditionExpression: `countdate = :dateyearmonth`,
-            UpdateExpression: `ADD ${counterType} :val`,
+            UpdateExpression: `ADD #counterType :val, #total :val SET #updatedAt =  :dt`,
+            ExpressionAttributeNames: {
+                '#counterType': `${counterType}`,
+                '#total': 'total',
+                '#updatedAt': 'updatedAt'
+            },
             ExpressionAttributeValues: {
                 ':val': { N: '1' },
+                ':dt': { S: new Date().toISOString() }
                 // ':dateyearmonth': {S: `${dt.getFullYear()}${('0'+(dt.getMonth()+1)).slice(-2)}`}  // 202007, 202008, 202011
             },
             ReturnValues: "UPDATED_NEW"
