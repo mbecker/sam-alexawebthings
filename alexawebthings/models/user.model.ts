@@ -6,10 +6,12 @@ import AWS from 'aws-sdk';
 
 // Create the DynamoDB service object
 const ddb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
+const docClient = new AWS.DynamoDB.DocumentClient()
 
 import * as _ from "lodash";
-import { log } from '../utils/log.utils';
+import { log, LogType } from '../utils/log.utils';
 import { CryptoHelper } from './cryptohelper';
+import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client';
 
 const jsonwebtoken = require('jsonwebtoken');
 
@@ -79,21 +81,23 @@ export module User {
     }
 
     export function addCount(user: IUser, counterType: IFAlexaCounter) {
-        if (!user.username) return log('user.mode', 'addCount', 'error: No this.username exists');
+        if (!user.username) return log(LogType.ERROR, 'user.mode', 'addCount', 'error: No this.username exists');
         const dt = new Date();
+        const countdate: string= `${dt.getFullYear()}${('0' + (dt.getMonth() + 1)).slice(-2)}`;
 
         var params = {
             TableName: process.env.DYNAMODBCOUNT,
             Key: {
                 'uuid': { S: user.username },
-                'countdate': { S: `${dt.getFullYear()}${('0' + (dt.getMonth() + 1)).slice(-2)}` }
+                'countdate': { S:  countdate}
             },
             // ConditionExpression: `countdate = :dateyearmonth`,
-            UpdateExpression: `ADD #counterType :val, #total :val SET #updatedAt =  :dt`,
+            UpdateExpression: `ADD #counterType :val, #total :val SET #updatedAt =  :dt, #lastrequest = :dt`,
             ExpressionAttributeNames: {
                 '#counterType': `${counterType}`,
                 '#total': 'total',
-                '#updatedAt': 'updatedAt'
+                '#updatedAt': 'updatedAt',
+                '#lastrequest': 'lastrequest'
             },
             ExpressionAttributeValues: {
                 ':val': { N: '1' },
@@ -103,13 +107,45 @@ export module User {
             ReturnValues: "UPDATED_NEW"
         };
 
-        log("user.model", "Updating counter type: " + counterType, params);
+        log(LogType.DEBUG,"user.model", "Updating counter type: " + counterType, params);
 
         ddb.updateItem(params, function (err, data) {
             if (err) {
-                log('user.mode', 'addCount', new Error("Unable to update item. Error JSON"), JSON.stringify(err, null, 2));
+                log(LogType.ERROR,'user.mode', 'addCount', new Error("Unable to update item. Error JSON"), JSON.stringify(err, null, 2));
             } else {
-                log('user.mode', 'addCount', "UpdateItem succeeded:", JSON.stringify(data, null, 2));
+                log(LogType.DEBUG,'user.mode', 'addCount', "UpdateItem succeeded:", JSON.stringify(data, null, 2));
+            }
+        });
+
+        const webthingsrequestParams: AWS.DynamoDB.UpdateItemInput = {
+            TableName: process.env.DYNAMODBREQUEST,
+            Key: {
+                'uuid': { S: user.username },
+                'countdate': { S:  countdate}
+            },
+            // ConditionExpression: `countdate = :dateyearmonth`,
+            UpdateExpression: `ADD #counterType :val, #total :val SET #updatedAt =  :dt, #createdAt = if_not_exists(#createdAt, :dt)`,
+            ExpressionAttributeNames: {
+                '#counterType': `${counterType}`,
+                '#total': 'total',
+                '#updatedAt': 'updatedAt',
+                '#createdAt': 'createdAt'
+            },
+            ExpressionAttributeValues: {
+                ':val': { N: '1' },
+                ':dt': { S: new Date().toISOString() },
+                // ':dateyearmonth': {S: `${dt.getFullYear()}${('0'+(dt.getMonth()+1)).slice(-2)}`}  // 202007, 202008, 202011
+            },
+            ReturnValues: "UPDATED_NEW"
+        };
+
+        log(LogType.DEBUG,"user.model", "Updating counter type: " + counterType, params);
+
+        ddb.updateItem(webthingsrequestParams, function (err, data) {
+            if (err) {
+                log(LogType.ERROR,'user.mode', 'addCount', new Error("Unable to update item. Error JSON"), JSON.stringify(err, null, 2));
+            } else {
+                log(LogType.DEBUG,'user.mode', 'addCount', "UpdateItem succeeded:", JSON.stringify(data, null, 2));
             }
         });
     }

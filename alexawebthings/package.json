@@ -33,7 +33,7 @@
     "copy:package": "cpx \"./package.json\" ../dist/",
     "test": "mocha --require ts-node/register ./**/*.spec.ts",
     "validate": "sam validate --template ../template.yaml",
-    "start:api": "concurrently --kill-others --kill-others-on-fail \"npm run build:watch\" \"sam local start-api --env-vars ../env.json --template ../template.yaml\"",
+    "start:api": "concurrently --kill-others --kill-others-on-fail \"npm run build:watch\" \"sam local start-api --port 3001 --env-vars ../env.json --template ../template.yaml\"",
     "start:invoke:alexa:discovery": "npm run build:debug && npm run build:tsc && sam local invoke --template ../template.yaml --env-vars ../env.json --event ../events/Alexa.Discovery.Discover.debug.json AlexaWebthingSkill",
     "start:debug:alexa:discovery": "npm run build:debug && npm run build:tsc && sam local invoke --debug-port 5858 --template ../template.yaml --env-vars ../env.json --event ../events/Alexa.Discovery.Discover.debug.json AlexaWebthingSkill",
     "start:invoke:alexa:reportstate:temperatureseonsor:weather": "npm run build:debug && npm run build:tsc && sam local invoke --template ../template.yaml --env-vars ../env.json --event ../events/Alexa.ReportState.TemperatureSensor.Weather.debug.json AlexaWebthingSkill",

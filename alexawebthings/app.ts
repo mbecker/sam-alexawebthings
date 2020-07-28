@@ -3,7 +3,7 @@ import * as _ from "lodash";
 import * as AWSLambda from 'aws-lambda';
 import {AWSLambdaAlexaResult} from './interfaces/aws.interfaces';
 
-import { log } from './utils/log.utils';
+import { log, LogType } from './utils/log.utils';
 import { AlexaGlobal, AlexaResponseInterface } from './models/alexa.model';
 import { handleThingsRequest, handleThingPropertyRequest, handleThingPropertyPut} from './services/webthings.service';
 import { User } from "./models/user.model";
@@ -45,10 +45,10 @@ import { User } from "./models/user.model";
  */
 export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:AWSLambda.Context):Promise<AWSLambda.APIGatewayProxyResult|AWSLambdaAlexaResult> {
 
-    log('Lamda API Handler', 'event', event);
+    log(LogType.DEBUG,'Lamda API Handler', 'event', event);
 
     if(event.httpMethod === 'OPTIONS') {
-        log('HTTP Method OPTIONS')
+        log(LogType.DEBUG,'HTTP Method OPTIONS')
         const response:AWSLambda.APIGatewayProxyResult = {
             'statusCode': 200,
             headers: {
@@ -60,7 +60,7 @@ export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:
             },
             'body': 'Hello World'
         }
-        log('SendResponse', 'apiResponse', response);
+        log(LogType.DEBUG,'SendResponse', 'apiResponse', response);
         return response;
     }
 
@@ -69,7 +69,7 @@ export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:
         body = await JSON.parse(event.body!);
         body.user = await getUserFromAlexaPayloadScopeToken(body);
     } catch (e) {
-        log('lambdaApiHandler', 'error', e);
+        log(LogType.ERROR,'lambdaApiHandler', 'error', e);
         return APIGatewayProxyResultError(e);
     }
     
@@ -91,19 +91,19 @@ export async function lambdaApiHandler(event:AWSLambda.APIGatewayEvent, context:
 
 export async function lambdaAlexaHandler(event:AlexaResponseInterface.DirectiveInterface, context:AWSLambda.Context):Promise<AWSLambda.APIGatewayProxyResult|AWSLambdaAlexaResult> {
 
-    log('Lamda Alexa Handler', 'event', event);
+    log(LogType.DEBUG,'Lamda Alexa Handler', 'event', event);
 
     try {
         event.user = await getUserFromAlexaPayloadScopeToken(event);
     } catch (e) {
-        log('lambdaAlexaHandler', 'error', e);
+        log(LogType.DEBUG,'lambdaAlexaHandler', 'error', e);
         return APIGatewayProxyResultError(e);
     }
 
 
     if (_.hasIn(event, 'directive.header.namespace') && _.hasIn(event, 'directive.header.name')) {
         
-        log(event.directive!.header.namespace, event.directive!.header.name);
+        log(LogType.DEBUG,event.directive!.header.namespace, event.directive!.header.name);
 
         if (event.directive!.header.namespace === AlexaGlobal.Interfaces.ALEXA_DISCOVERY && event.directive!.header.name === AlexaGlobal.DirectiveHeaderNames.DISCOVER) { 
             // Add count
@@ -160,7 +160,7 @@ async function getUserFromAlexaPayloadScopeToken(event:AlexaResponseInterface.Di
         // if(!jwt.hasWebthings(JWT.JWTWerbthingsConstants.WebthingsJWT)) throw new Error('JWT.webthingsJWT does not exist.')
         // return jwt;
     } catch (err) {
-        log('getUserFromAlexaPayloadScopeToken', 'error', err);
+        log(LogType.ERROR,'getUserFromAlexaPayloadScopeToken', 'error', err);
         return err;
     }
 }
@@ -177,7 +177,7 @@ async function AlexaDiscoverDirective(event:AlexaResponseInterface.DirectiveInte
             return SendResponse(alexaResult.getDiscoverResponse(), alexaResponse);
         })
         .catch(err => {
-            log('AlexaDiscoverDirective', 'handleThingsRequest', 'error', err)
+            log(LogType.ERROR,'AlexaDiscoverDirective', 'handleThingsRequest', 'error', err)
             return APIGatewayProxyResultError(err);
         })
 }
@@ -209,7 +209,7 @@ async function AlexaReportStateDirective(event:AlexaResponseInterface.DirectiveI
             return SendResponse(alexaResult.getStateReportDirectiveResponse(), alexaResponse);
         })
         .catch(err => {
-            log('AlexaReportStateDirective', 'handleThingPropertyRequest', 'error', err)
+            log(LogType.ERROR,'AlexaReportStateDirective', 'handleThingPropertyRequest', 'error', err)
             return APIGatewayProxyResultError(err);
         })
 }
@@ -240,7 +240,7 @@ async function AlexaPowerControllerDirective(event:AlexaResponseInterface.Direct
                     return SendResponse(alexaResult.getStateReportDirectiveResponse(), alexaResponse);
                 })
                 .catch(err => {
-                    log('AlexaPowerControllerDirective', 'handleThingPropertyPut', 'error', err)
+                    log(LogType.ERROR,'AlexaPowerControllerDirective', 'handleThingPropertyPut', 'error', err)
                     return APIGatewayProxyResultError(err);
                 })
     }
@@ -271,7 +271,7 @@ async function SendResponse(result: AlexaResponseInterface.ResponseInterface, al
     const body: string = JSON.stringify(result);
     
     if(alexaResponse) {
-        log('SendResponse', 'alexaResponse', body);
+        log(LogType.DEBUG,'SendResponse', 'alexaResponse', body);
         return result;
     }
     
@@ -286,6 +286,6 @@ async function SendResponse(result: AlexaResponseInterface.ResponseInterface, al
         },
         'body': body
     }
-    log('SendResponse', 'apiResponse', response);
+    log(LogType.DEBUG,'SendResponse', 'apiResponse', response);
     return response;
 }

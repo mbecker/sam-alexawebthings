@@ -62,7 +62,6 @@ export async function handleThingPropertyRequest(user: User.IUser, endpointID: s
 }
 
 export async function handleThingPropertyPut(user: User.IUser, endpointID: string, propertyKey: string, propertyValue: any): Promise<Webthing.PropertyResponse> {
-
     const options = {
         method: 'put',
         url: `${user.webthingsUrl}/things/${endpointID}/properties/${propertyKey}`,
